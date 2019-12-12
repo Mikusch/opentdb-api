@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
  * @see OpenTDB#sendAsync(Request)
  * @see #sendAsync(OpenTDB)
  */
-@SuppressWarnings("unused")
 public class Request {
 
     private final int amount;
