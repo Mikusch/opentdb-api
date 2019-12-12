@@ -43,35 +43,30 @@ public class Requester {
         this.api = api;
     }
 
-    public CompletableFuture<List<Question>> sendAsync(final Request request) {
+    public CompletableFuture<List<Question<?, ?>>> sendAsync(final Request request) {
         return api.getHttpClient().sendAsync(this.buildHttpRequest(request), HttpResponse.BodyHandlers.ofString()).thenApplyAsync(this::handleResponse);
     }
 
     private HttpRequest buildHttpRequest(final Request request) {
         final StringBuilder uri = new StringBuilder(QUESTION_ENDPOINT)
-                .append("?" + api.getEncodingType().getParameterName() + "=" + api.getEncodingType().getParameterValue())
-                .append("&" + QUERY_PARAM_AMOUNT + "=" + request.getAmount());
+                .append("?").append(api.getEncodingType().getParameterName()).append("=").append(api.getEncodingType().getParameterValue())
+                .append("&" + QUERY_PARAM_AMOUNT + "=").append(request.getAmount());
 
-        if (request.getCategory() != null) {
-            uri.append("&" + request.getCategory().getParameterName() + "=" + request.getCategory().getParameterValue());
-        }
+        if (request.getCategory() != null)
+            uri.append("&").append(request.getCategory().getParameterName()).append("=").append(request.getCategory().getParameterValue());
 
-        if (request.getType() != null) {
-            uri.append("&" + request.getType().getParameterName() + "=" + request.getType().getParameterValue());
-        }
+        if (request.getType() != null)
+            uri.append("&").append(request.getType().getParameterName()).append("=").append(request.getType().getParameterValue());
 
-        if (request.getDifficulty() != null) {
-            uri.append("&" + request.getDifficulty().getParameterName() + "=" + request.getDifficulty().getParameterValue());
-        }
+        if (request.getDifficulty() != null)
+            uri.append("&").append(request.getDifficulty().getParameterName()).append("=").append(request.getDifficulty().getParameterValue());
 
         // token has been disabled or hasnt been fetched yet
-        if (api.getToken() != null) {
-            uri.append("&" + QUERY_PARAM_TOKEN + "=" + api.getToken());
-        }
+        if (api.getToken() != null) uri.append("&" + QUERY_PARAM_TOKEN + "=").append(api.getToken());
         return HttpRequest.newBuilder(URI.create(uri.toString())).build();
     }
 
-    private List<Question> handleResponse(final HttpResponse<String> httpResponse) throws ErrorResponseException {
+    private List<Question<?, ?>> handleResponse(final HttpResponse<String> httpResponse) throws ErrorResponseException {
         final JSONObject body = new JSONObject(httpResponse.body());
         final ResponseCode response = ResponseCode.fromCode(body.getInt("response_code"));
         switch (response) {
@@ -86,14 +81,14 @@ public class Requester {
         }
     }
 
-    private List<Question> getQuestionsFromJson(final JSONObject body) {
-        final List<Question> questions = new ArrayList<>();
+    private List<Question<?, ?>> getQuestionsFromJson(final JSONObject body) {
+        final List<Question<?, ?>> questions = new ArrayList<>();
         final JSONArray jsonArray = body.getJSONArray("results");
         jsonArray.forEach(element -> {
             final JSONObject jsonElement = (JSONObject) element;
             final Question.Type type = Question.Type.valueOf(jsonElement.getString("type").toUpperCase());
 
-            final Question question;
+            final Question<?, ?> question;
             switch (type) {
 
                 case BOOLEAN:
@@ -154,7 +149,7 @@ public class Requester {
         }
     }
 
-    public List<Question> send(final Request request) throws ErrorResponseException {
+    public List<Question<?, ?>> send(final Request request) throws ErrorResponseException {
         try {
             return this.handleResponse(api.getHttpClient().send(this.buildHttpRequest(request), HttpResponse.BodyHandlers.ofString()));
         } catch (final IOException | InterruptedException e) {

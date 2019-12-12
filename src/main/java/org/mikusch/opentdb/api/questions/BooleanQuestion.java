@@ -1,5 +1,7 @@
 package org.mikusch.opentdb.api.questions;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents a "True/False" question received from the OpenTDB API.
  */
@@ -26,6 +28,7 @@ public class BooleanQuestion extends Question<Boolean, Boolean> {
     /**
      * @inheritDoc
      */
+    @Nonnull
     @Override
     public Type getType() {
         return Type.BOOLEAN;

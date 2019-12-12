@@ -1,5 +1,7 @@
 package org.mikusch.opentdb.api.requests;
 
+import javax.annotation.Nonnull;
+
 /**
  * Indicates a request parameter used in HTTP requests to the OpenTDB API.
  */
@@ -10,6 +12,7 @@ public interface RequestParameter {
      *
      * @return the parameter name
      */
+    @Nonnull
     String getParameterName();
 
     /**
@@ -17,5 +20,6 @@ public interface RequestParameter {
      *
      * @return the parameter value
      */
+    @Nonnull
     String getParameterValue();
 }

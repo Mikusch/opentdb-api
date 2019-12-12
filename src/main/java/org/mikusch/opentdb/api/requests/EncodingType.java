@@ -1,5 +1,7 @@
 package org.mikusch.opentdb.api.requests;
 
+import javax.annotation.Nonnull;
+
 public enum EncodingType implements RequestParameter {
 
     HTML_CODES("", "Default Encoding (HTML Codes)"),
@@ -15,16 +17,19 @@ public enum EncodingType implements RequestParameter {
         this.name = name;
     }
 
+    @Nonnull
     @Override
     public String getParameterName() {
         return "encode";
     }
 
+    @Nonnull
     @Override
     public String getParameterValue() {
         return code;
     }
 
+    @Nonnull
     public String getReadableName() {
         return name;
     }

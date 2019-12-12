@@ -1,13 +1,13 @@
 package org.mikusch.opentdb.api;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.mikusch.opentdb.api.questions.Question;
 import org.mikusch.opentdb.api.requests.EncodingType;
 import org.mikusch.opentdb.api.requests.ErrorResponseException;
 import org.mikusch.opentdb.api.requests.Request;
 import org.mikusch.opentdb.internal.OpenTDBImpl;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +25,7 @@ public interface OpenTDB {
      *
      * @return a new {@code OpenTDB} instance
      */
+    @Nonnull
     static OpenTDB newOpenTDB() {
         return newBuilder().build();
     }
@@ -34,6 +35,7 @@ public interface OpenTDB {
      *
      * @return an {@code OpenTDB.Builder}
      */
+    @Nonnull
     static Builder newBuilder() {
         return new OpenTDBImpl.BuilderImpl();
     }
@@ -43,7 +45,7 @@ public interface OpenTDB {
      *
      * @return an {@link HttpClient}
      */
-    @NotNull
+    @Nonnull
     HttpClient getHttpClient();
 
     /**
@@ -64,7 +66,7 @@ public interface OpenTDB {
      *
      * @return the encoding type
      */
-    @NotNull
+    @Nonnull
     EncodingType getEncodingType();
 
     /**
@@ -73,7 +75,7 @@ public interface OpenTDB {
      * @return never-null {@link CompletableFuture} task representing the completion promise
      * @throws IllegalStateException if the session token is {@code null}
      */
-    @NotNull
+    @Nonnull
     CompletableFuture<Void> resetToken() throws IllegalStateException;
 
     /**
@@ -82,6 +84,7 @@ public interface OpenTDB {
      * @return the current OpenTDB instance, for chaining convenience
      * @throws InterruptedException if this thread is interrupted while waiting
      */
+    @Nonnull
     OpenTDB awaitToken() throws InterruptedException;
 
     /**
@@ -90,7 +93,8 @@ public interface OpenTDB {
      * @param amount the amount of questions
      * @return a {@link CompletableFuture} task representing the completion promise
      */
-    CompletableFuture<List<Question>> fetchQuestionsAsync(int amount);
+    @Nonnull
+    CompletableFuture<List<Question<?, ?>>> fetchQuestionsAsync(int amount);
 
     /**
      * Submits the passed {@link Request} and provides a {@link CompletableFuture} containing a {@code List<Question>} representing its completion task.
@@ -98,7 +102,8 @@ public interface OpenTDB {
      * @param request the {@link Request} to send
      * @return a {@link CompletableFuture} task representing the completion promise
      */
-    CompletableFuture<List<Question>> sendAsync(Request request);
+    @Nonnull
+    CompletableFuture<List<Question<?, ?>>> sendAsync(Request request);
 
     /**
      * Submits the passed {@link Request} and blocks the thread until its completion.
@@ -107,7 +112,8 @@ public interface OpenTDB {
      * @return a {@code List<Question>}
      * @throws ErrorResponseException if the request failed to send
      */
-    List<Question> send(Request request) throws ErrorResponseException;
+    @Nonnull
+    List<Question<?, ?>> send(Request request) throws ErrorResponseException;
 
     interface Builder {
 
@@ -117,6 +123,7 @@ public interface OpenTDB {
          * @param httpClient the {@link HttpClient}
          * @return the current {@code OpenTDB.Builder} instance for chaining
          */
+        @Nonnull
         Builder setHttpClient(HttpClient httpClient);
 
         /**
@@ -127,6 +134,7 @@ public interface OpenTDB {
          * @param encoding the {@link EncodingType}
          * @return the current {@code OpenTDB.Builder} instance for chaining
          */
+        @Nonnull
         Builder setEncoding(EncodingType encoding);
 
         /**
@@ -141,6 +149,7 @@ public interface OpenTDB {
          *
          * @return the current {@code OpenTDB.Builder} instance for chaining
          */
+        @Nonnull
         Builder useSessionToken(boolean useSessionToken);
 
         /**
@@ -152,6 +161,7 @@ public interface OpenTDB {
          * @return the {@link OpenTDB} instance
          * @see #awaitToken()
          */
+        @Nonnull
         OpenTDB build();
     }
 }

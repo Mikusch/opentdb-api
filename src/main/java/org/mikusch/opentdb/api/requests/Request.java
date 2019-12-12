@@ -3,6 +3,8 @@ package org.mikusch.opentdb.api.requests;
 import org.mikusch.opentdb.api.OpenTDB;
 import org.mikusch.opentdb.api.questions.Question;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
  * @see OpenTDB#sendAsync(Request)
  * @see #sendAsync(OpenTDB)
  */
+@SuppressWarnings("unused")
 public class Request {
 
     private final int amount;
@@ -39,6 +42,7 @@ public class Request {
      * @return a new {@code Request}
      * @throws IllegalArgumentException if the amount is zero or negative
      */
+    @Nonnull
     public static Request newRequest(final int amount) throws IllegalArgumentException {
         return newBuilder(amount).build();
     }
@@ -52,6 +56,7 @@ public class Request {
      * @return a {@link Request.Builder}
      * @throws IllegalArgumentException if the amount is zero or negative
      */
+    @Nonnull
     public static Builder newBuilder(final int amount) throws IllegalArgumentException {
         return new Builder(amount);
     }
@@ -64,7 +69,8 @@ public class Request {
      * @throws IOException          if an I/O error occurs when sending
      * @throws InterruptedException if the operation is interrupted
      */
-    public List<Question> send(final OpenTDB api) throws IOException, InterruptedException {
+    @Nonnull
+    public List<Question<?, ?>> send(final OpenTDB api) throws IOException, InterruptedException {
         return api.send(this);
     }
 
@@ -82,6 +88,7 @@ public class Request {
      *
      * @return the {@link Question.Category}
      */
+    @Nullable
     public Question.Category getCategory() {
         return category;
     }
@@ -91,6 +98,7 @@ public class Request {
      *
      * @return the {@link Question.Type}
      */
+    @Nullable
     public Question.Type getType() {
         return type;
     }
@@ -100,6 +108,7 @@ public class Request {
      *
      * @return the {@link Question.Difficulty}
      */
+    @Nullable
     public Question.Difficulty getDifficulty() {
         return difficulty;
     }
@@ -110,7 +119,8 @@ public class Request {
      * @param api the {@link OpenTDB} object
      * @return a {@link CompletableFuture} task representing the completion promise
      */
-    public CompletableFuture<List<Question>> sendAsync(final OpenTDB api) {
+    @Nonnull
+    public CompletableFuture<List<Question<?, ?>>> sendAsync(final OpenTDB api) {
         return api.sendAsync(this);
     }
 
@@ -129,6 +139,7 @@ public class Request {
          * @param amount the amount of questions, maximum 50
          * @throws IllegalArgumentException if the amount is zero or negative
          */
+        @Nonnull
         public Builder(final int amount) throws IllegalArgumentException {
             if (amount <= 0) throw new IllegalArgumentException("Can't create a request with an amount of 0 or less");
             this.amount = amount;
@@ -142,7 +153,8 @@ public class Request {
          * @see Question.Category#fromId(int)
          * @see Question.Category#fromName(String)
          */
-        public Builder fromCategory(final Question.Category category) {
+        @Nonnull
+        public Builder fromCategory(@Nullable final Question.Category category) {
             this.category = category;
             return this;
         }
@@ -153,7 +165,8 @@ public class Request {
          * @param type {@link Question.Type#MULTIPLE Multiple Choice} or {@link Question.Type#BOOLEAN True/False}
          * @return the current {@link Builder} instance
          */
-        public Builder ofType(final Question.Type type) {
+        @Nonnull
+        public Builder ofType(@Nullable final Question.Type type) {
             this.type = type;
             return this;
         }
@@ -164,7 +177,8 @@ public class Request {
          * @param difficulty {@link Question.Difficulty#EASY Easy}, {@link Question.Difficulty#MEDIUM Medium} or {@link Question.Difficulty#HARD Hard}
          * @return the current {@link Builder} instance
          */
-        public Builder ofDifficulty(final Question.Difficulty difficulty) {
+        @Nonnull
+        public Builder ofDifficulty(@Nullable final Question.Difficulty difficulty) {
             this.difficulty = difficulty;
             return this;
         }
@@ -174,6 +188,7 @@ public class Request {
          *
          * @return a new {@link Request}
          */
+        @Nonnull
         public Request build() {
             return new Request(amount, category, type, difficulty);
         }

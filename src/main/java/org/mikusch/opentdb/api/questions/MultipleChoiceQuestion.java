@@ -1,5 +1,6 @@
 package org.mikusch.opentdb.api.questions;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 
 /**
@@ -18,6 +19,7 @@ public class MultipleChoiceQuestion extends Question<String, Collection<String>>
     /**
      * @inheritDoc
      */
+    @Nonnull
     @Override
     public Type getType() {
         return Type.MULTIPLE;

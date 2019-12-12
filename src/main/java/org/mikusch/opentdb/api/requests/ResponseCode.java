@@ -1,5 +1,6 @@
 package org.mikusch.opentdb.api.requests;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 /**
@@ -65,6 +66,7 @@ public enum ResponseCode {
      * @param code the code
      * @return the {@code ResponseCode}, or {@link ResponseCode#UNKNOWN} if none could be found
      */
+    @Nonnull
     public static ResponseCode fromCode(final int code) {
         return Arrays.stream(ResponseCode.values()).filter(responseCode -> responseCode.code == code).findFirst().orElse(UNKNOWN);
     }
@@ -83,6 +85,7 @@ public enum ResponseCode {
      *
      * @return the meaning
      */
+    @Nonnull
     public String getMeaning() {
         return meaning;
     }

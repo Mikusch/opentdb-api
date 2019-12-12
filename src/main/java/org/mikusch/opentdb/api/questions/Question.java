@@ -1,13 +1,13 @@
 package org.mikusch.opentdb.api.questions;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.mikusch.opentdb.api.OpenTDB;
 import org.mikusch.opentdb.api.requests.RequestParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -47,6 +47,7 @@ public abstract class Question<C, I> {
      *
      * @return the {@link Category}
      */
+    @Nonnull
     public Category getCategory() {
         return category;
     }
@@ -56,6 +57,7 @@ public abstract class Question<C, I> {
      *
      * @return the {@link Difficulty}
      */
+    @Nonnull
     public Difficulty getDifficulty() {
         return difficulty;
     }
@@ -65,6 +67,7 @@ public abstract class Question<C, I> {
      *
      * @return the question
      */
+    @Nonnull
     public String getQuestion() {
         return question;
     }
@@ -74,6 +77,7 @@ public abstract class Question<C, I> {
      *
      * @return the correct answer
      */
+    @Nonnull
     public C getCorrectAnswer() {
         return correctAnswer;
     }
@@ -83,6 +87,7 @@ public abstract class Question<C, I> {
      *
      * @return the incorrect answer(s)
      */
+    @Nonnull
     public I getIncorrectAnswers() {
         return incorrectAnswers;
     }
@@ -93,7 +98,7 @@ public abstract class Question<C, I> {
      * @param answer the answer to check
      * @return {@code true} if the given answer is correct
      */
-    public boolean isCorrectAnswer(@NotNull final C answer) {
+    public boolean isCorrectAnswer(@Nonnull final C answer) {
         return correctAnswer.equals(answer);
     }
 
@@ -103,7 +108,7 @@ public abstract class Question<C, I> {
      *
      * @return this question, converted to a {@link MultipleChoiceQuestion}
      */
-    public MultipleChoiceQuestion toMultiple() {
+    public MultipleChoiceQuestion toMultipleChoice() {
         return ((MultipleChoiceQuestion) this);
     }
 
@@ -127,6 +132,7 @@ public abstract class Question<C, I> {
      *
      * @return the {@link Type}
      */
+    @Nonnull
     public abstract Type getType();
 
     /**
@@ -149,6 +155,7 @@ public abstract class Question<C, I> {
             this.code = code;
         }
 
+        @Nonnull
         @Override
         public String getParameterName() {
             return "type";
@@ -159,6 +166,8 @@ public abstract class Question<C, I> {
          *
          * @return the code
          */
+        @Nonnull
+        @Override
         public String getParameterValue() {
             return code;
         }
@@ -190,6 +199,7 @@ public abstract class Question<C, I> {
             this.code = code;
         }
 
+        @Nonnull
         @Override
         public String getParameterName() {
             return "difficulty";
@@ -200,6 +210,8 @@ public abstract class Question<C, I> {
          *
          * @return the code
          */
+        @Nonnull
+        @Override
         public String getParameterValue() {
             return code;
         }
@@ -208,31 +220,13 @@ public abstract class Question<C, I> {
     /**
      * Represents the category a question belongs to.
      * <p/>
-     * This class will statically load in all available categories which can be inspected with {@link #getAvailableCategories()}.
+     * You can retrieve a list of available categories using {@link #getAvailableCategories()}.
      */
     public static class Category implements RequestParameter {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(Category.class);
         private static final String CATEGORY_ENDPOINT = OpenTDB.BASE_URL + "/api_category.php";
         private static final List<Category> CATEGORIES = new ArrayList<>();
-
-        static {
-            // static block used to load categories
-            LOGGER.info("Fetching OpenTDB categories");
-            final HttpClient client = HttpClient.newHttpClient();
-            final HttpRequest request = HttpRequest.newBuilder(URI.create(CATEGORY_ENDPOINT)).build();
-            try {
-                final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                new JSONObject(response.body()).getJSONArray("trivia_categories").forEach(e -> {
-                    final JSONObject jsonObject = (JSONObject) e;
-                    final Category category = new Category(jsonObject.getInt("id"), jsonObject.getString("name"));
-                    LOGGER.trace("Found OpenTDB category: {}", category);
-                    CATEGORIES.add(category);
-                });
-            } catch (final IOException | InterruptedException e) {
-                LOGGER.error("Failed to fetch OpenTDB categories", e);
-            }
-        }
 
         private final int id;
         private final String name;
@@ -247,6 +241,7 @@ public abstract class Question<C, I> {
          *
          * @return an unmodifiable list of all available categories
          */
+        @Nonnull
         public static Collection<Category> getAvailableCategories() {
             return Collections.unmodifiableCollection(CATEGORIES);
         }
@@ -274,6 +269,30 @@ public abstract class Question<C, I> {
         }
 
         /**
+         * Fetches all categories from the OpenTDB API.
+         *
+         * @param client the {@link HttpClient} to use
+         */
+        public static void loadCategories(final HttpClient client) {
+            LOGGER.info("Fetching OpenTDB categories");
+
+            CATEGORIES.clear();
+            final HttpRequest request = HttpRequest.newBuilder(URI.create(CATEGORY_ENDPOINT)).build();
+
+            try {
+                final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                new JSONObject(response.body()).getJSONArray("trivia_categories").forEach(o -> {
+                    final JSONObject jsonObject = (JSONObject) o;
+                    final Category category = new Category(jsonObject.getInt("id"), jsonObject.getString("name"));
+                    LOGGER.trace("Found OpenTDB category: {}", category);
+                    CATEGORIES.add(category);
+                });
+            } catch (final IOException | InterruptedException e) {
+                LOGGER.error("Failed to fetch OpenTDB categories", e);
+            }
+        }
+
+        /**
          * Returns the ID of this category.
          *
          * @return the category ID
@@ -287,6 +306,7 @@ public abstract class Question<C, I> {
          *
          * @return the category name
          */
+        @Nonnull
         public String getReadableName() {
             return name;
         }
@@ -296,11 +316,13 @@ public abstract class Question<C, I> {
             return "C:" + name + "(" + id + ")";
         }
 
+        @Nonnull
         @Override
         public String getParameterName() {
             return "category";
         }
 
+        @Nonnull
         @Override
         public String getParameterValue() {
             return String.valueOf(id);

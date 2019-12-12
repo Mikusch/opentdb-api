@@ -1,12 +1,12 @@
 package org.mikusch.opentdb.internal;
 
-import org.jetbrains.annotations.NotNull;
 import org.mikusch.opentdb.api.OpenTDB;
 import org.mikusch.opentdb.api.questions.Question;
 import org.mikusch.opentdb.api.requests.EncodingType;
 import org.mikusch.opentdb.api.requests.ErrorResponseException;
 import org.mikusch.opentdb.api.requests.Request;
 
+import javax.annotation.Nonnull;
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.Objects;
@@ -29,9 +29,12 @@ public class OpenTDBImpl implements OpenTDB {
         if (useSessionToken) {
             requester.fetchToken();
         }
+
+        // Fetch all categories with provided HttpClient
+        Question.Category.loadCategories(httpClient);
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public HttpClient getHttpClient() {
         return httpClient;
@@ -46,19 +49,20 @@ public class OpenTDBImpl implements OpenTDB {
         this.token = token;
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public EncodingType getEncodingType() {
         return encoding;
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public CompletableFuture<Void> resetToken() throws IllegalStateException {
         if (token == null) throw new IllegalStateException("Can't reset a null session token");
         return requester.resetToken();
     }
 
+    @Nonnull
     @Override
     public OpenTDB awaitToken() throws InterruptedException {
         while (token == null) {
@@ -67,18 +71,21 @@ public class OpenTDBImpl implements OpenTDB {
         return this;
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<List<Question>> fetchQuestionsAsync(final int amount) {
+    public CompletableFuture<List<Question<?, ?>>> fetchQuestionsAsync(final int amount) {
         return requester.sendAsync(Request.newRequest(amount));
     }
 
+    @Nonnull
     @Override
-    public CompletableFuture<List<Question>> sendAsync(final Request request) {
+    public CompletableFuture<List<Question<?, ?>>> sendAsync(final Request request) {
         return requester.sendAsync(request);
     }
 
+    @Nonnull
     @Override
-    public List<Question> send(final Request request) throws ErrorResponseException {
+    public List<Question<?, ?>> send(final Request request) throws ErrorResponseException {
         return requester.send(request);
     }
 
@@ -88,24 +95,28 @@ public class OpenTDBImpl implements OpenTDB {
         private EncodingType encoding = EncodingType.HTML_CODES;
         private boolean useSessionToken = true;
 
+        @Nonnull
         @Override
         public Builder setHttpClient(final HttpClient httpClient) {
             this.httpClient = httpClient;
             return this;
         }
 
+        @Nonnull
         @Override
         public Builder setEncoding(final EncodingType encoding) {
             this.encoding = encoding;
             return this;
         }
 
+        @Nonnull
         @Override
         public Builder useSessionToken(final boolean useSessionToken) {
             this.useSessionToken = useSessionToken;
             return this;
         }
 
+        @Nonnull
         @Override
         public OpenTDB build() {
             return new OpenTDBImpl(httpClient, encoding, useSessionToken);
