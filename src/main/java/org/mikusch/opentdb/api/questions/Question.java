@@ -26,18 +26,19 @@ import java.util.List;
  * @see MultipleChoiceQuestion
  * @see BooleanQuestion
  */
-public abstract class Question<C, I> {
-
+public abstract class Question<C, I>
+{
     private final Category category;
     private final Difficulty difficulty;
-    private final String question;
+    private final String text;
     private final C correctAnswer;
     private final I incorrectAnswers;
 
-    protected Question(final Category category, final Difficulty difficulty, final String question, final C correctAnswer, final I incorrectAnswers) {
+    protected Question(final Category category, final Difficulty difficulty, final String text, final C correctAnswer, final I incorrectAnswers)
+    {
         this.category = category;
         this.difficulty = difficulty;
-        this.question = question;
+        this.text = text;
         this.correctAnswer = correctAnswer;
         this.incorrectAnswers = incorrectAnswers;
     }
@@ -48,7 +49,8 @@ public abstract class Question<C, I> {
      * @return the {@link Category}
      */
     @Nonnull
-    public Category getCategory() {
+    public Category getCategory()
+    {
         return category;
     }
 
@@ -58,7 +60,8 @@ public abstract class Question<C, I> {
      * @return the {@link Difficulty}
      */
     @Nonnull
-    public Difficulty getDifficulty() {
+    public Difficulty getDifficulty()
+    {
         return difficulty;
     }
 
@@ -68,8 +71,9 @@ public abstract class Question<C, I> {
      * @return the question
      */
     @Nonnull
-    public String getQuestion() {
-        return question;
+    public String getText()
+    {
+        return text;
     }
 
     /**
@@ -78,7 +82,8 @@ public abstract class Question<C, I> {
      * @return the correct answer
      */
     @Nonnull
-    public C getCorrectAnswer() {
+    public C getCorrectAnswer()
+    {
         return correctAnswer;
     }
 
@@ -88,7 +93,8 @@ public abstract class Question<C, I> {
      * @return the incorrect answer(s)
      */
     @Nonnull
-    public I getIncorrectAnswers() {
+    public I getIncorrectAnswers()
+    {
         return incorrectAnswers;
     }
 
@@ -98,7 +104,8 @@ public abstract class Question<C, I> {
      * @param answer the answer to check
      * @return {@code true} if the given answer is correct
      */
-    public boolean isCorrectAnswer(@Nonnull final C answer) {
+    public boolean isCorrectAnswer(@Nonnull final C answer)
+    {
         return correctAnswer.equals(answer);
     }
 
@@ -108,7 +115,8 @@ public abstract class Question<C, I> {
      *
      * @return this question, converted to a {@link MultipleChoiceQuestion}
      */
-    public MultipleChoiceQuestion toMultipleChoice() {
+    public MultipleChoiceQuestion toMultipleChoice()
+    {
         return ((MultipleChoiceQuestion) this);
     }
 
@@ -118,13 +126,15 @@ public abstract class Question<C, I> {
      *
      * @return this question, converted to a {@link BooleanQuestion}
      */
-    public BooleanQuestion toBoolean() {
+    public BooleanQuestion toBoolean()
+    {
         return ((BooleanQuestion) this);
     }
 
     @Override
-    public String toString() {
-        return "Q:" + question + "(" + category + "/" + this.getType() + "/" + difficulty + ")";
+    public String toString()
+    {
+        return "Q:" + text + "(" + category + "/" + this.getType() + "/" + difficulty + ")";
     }
 
     /**
@@ -138,8 +148,8 @@ public abstract class Question<C, I> {
     /**
      * Represents the type of question.
      **/
-    public enum Type implements RequestParameter {
-
+    public enum Type implements RequestParameter
+    {
         /**
          * True/False
          */
@@ -151,13 +161,15 @@ public abstract class Question<C, I> {
 
         private final String code;
 
-        Type(final String code) {
+        Type(final String code)
+        {
             this.code = code;
         }
 
         @Nonnull
         @Override
-        public String getParameterName() {
+        public String getParameterName()
+        {
             return "type";
         }
 
@@ -168,7 +180,8 @@ public abstract class Question<C, I> {
          */
         @Nonnull
         @Override
-        public String getParameterValue() {
+        public String getParameterValue()
+        {
             return code;
         }
     }
@@ -176,8 +189,8 @@ public abstract class Question<C, I> {
     /**
      * Represents the difficulty of a question.
      */
-    public enum Difficulty implements RequestParameter {
-
+    public enum Difficulty implements RequestParameter
+    {
         /**
          * Easy
          */
@@ -195,13 +208,15 @@ public abstract class Question<C, I> {
 
         private final String code;
 
-        Difficulty(final String code) {
+        Difficulty(final String code)
+        {
             this.code = code;
         }
 
         @Nonnull
         @Override
-        public String getParameterName() {
+        public String getParameterName()
+        {
             return "difficulty";
         }
 
@@ -212,7 +227,8 @@ public abstract class Question<C, I> {
          */
         @Nonnull
         @Override
-        public String getParameterValue() {
+        public String getParameterValue()
+        {
             return code;
         }
     }
@@ -222,8 +238,8 @@ public abstract class Question<C, I> {
      * <p/>
      * You can retrieve a list of available categories using {@link #getAvailableCategories()}.
      */
-    public static class Category implements RequestParameter {
-
+    public static class Category implements RequestParameter
+    {
         private static final Logger LOGGER = LoggerFactory.getLogger(Category.class);
         private static final String CATEGORY_ENDPOINT = OpenTDB.BASE_URL + "/api_category.php";
         private static final List<Category> CATEGORIES = new ArrayList<>();
@@ -231,7 +247,8 @@ public abstract class Question<C, I> {
         private final int id;
         private final String name;
 
-        private Category(final int id, final String name) {
+        private Category(final int id, final String name)
+        {
             this.id = id;
             this.name = name;
         }
@@ -242,7 +259,8 @@ public abstract class Question<C, I> {
          * @return an unmodifiable list of all available categories
          */
         @Nonnull
-        public static Collection<Category> getAvailableCategories() {
+        public static Collection<Category> getAvailableCategories()
+        {
             return Collections.unmodifiableCollection(CATEGORIES);
         }
 
@@ -253,7 +271,8 @@ public abstract class Question<C, I> {
          * @return a possibly-null {@link Category}
          */
         @Nullable
-        public static Category fromId(final int id) {
+        public static Category fromId(final int id)
+        {
             return CATEGORIES.stream().filter(category -> category.id == id).findFirst().orElse(null);
         }
 
@@ -264,7 +283,8 @@ public abstract class Question<C, I> {
          * @return a possibly-null {@link Category}
          */
         @Nullable
-        public static Category fromName(final String name) {
+        public static Category fromName(final String name)
+        {
             return CATEGORIES.stream().filter(category -> category.name.equals(name)).findFirst().orElse(null);
         }
 
@@ -273,13 +293,15 @@ public abstract class Question<C, I> {
          *
          * @param client the {@link HttpClient} to use
          */
-        public static void loadCategories(final HttpClient client) {
+        public static void loadCategories(final HttpClient client)
+        {
             LOGGER.info("Fetching OpenTDB categories");
 
             CATEGORIES.clear();
             final HttpRequest request = HttpRequest.newBuilder(URI.create(CATEGORY_ENDPOINT)).build();
 
-            try {
+            try
+            {
                 final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 new JSONObject(response.body()).getJSONArray("trivia_categories").forEach(o -> {
                     final JSONObject jsonObject = (JSONObject) o;
@@ -287,8 +309,11 @@ public abstract class Question<C, I> {
                     LOGGER.trace("Found OpenTDB category: {}", category);
                     CATEGORIES.add(category);
                 });
-            } catch (final IOException | InterruptedException e) {
+            }
+            catch (final IOException | InterruptedException e)
+            {
                 LOGGER.error("Failed to fetch OpenTDB categories", e);
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -297,7 +322,8 @@ public abstract class Question<C, I> {
          *
          * @return the category ID
          */
-        public int getId() {
+        public int getId()
+        {
             return id;
         }
 
@@ -307,24 +333,28 @@ public abstract class Question<C, I> {
          * @return the category name
          */
         @Nonnull
-        public String getReadableName() {
+        public String getReadableName()
+        {
             return name;
         }
 
         @Override
-        public String toString() {
+        public String toString()
+        {
             return "C:" + name + "(" + id + ")";
         }
 
         @Nonnull
         @Override
-        public String getParameterName() {
+        public String getParameterName()
+        {
             return "category";
         }
 
         @Nonnull
         @Override
-        public String getParameterValue() {
+        public String getParameterValue()
+        {
             return String.valueOf(id);
         }
     }

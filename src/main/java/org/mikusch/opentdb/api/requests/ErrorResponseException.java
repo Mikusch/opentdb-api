@@ -6,18 +6,21 @@ import javax.annotation.Nonnull;
  * Indicates an error that is returned by a OpenTDB API Request.<br>
  * It holds a {@link ResponseCode ResponseCode} whose {@link ResponseCode#isError()} method is guaranteed to return {@code true}.
  */
-public class ErrorResponseException extends RuntimeException {
-
+public class ErrorResponseException extends RuntimeException
+{
     private static final long serialVersionUID = 3647944889441414747L;
     private final ResponseCode responseCode;
 
-    public ErrorResponseException(final ResponseCode responseCode) {
+    public ErrorResponseException(final ResponseCode responseCode)
+    {
         this(responseCode, responseCode.getCode() + ": " + responseCode.getMeaning());
     }
 
-    public ErrorResponseException(@Nonnull final ResponseCode responseCode, @Nonnull final String message) {
+    public ErrorResponseException(@Nonnull final ResponseCode responseCode, @Nonnull final String message)
+    {
         super(message);
-        if (!responseCode.isError()) {
+        if (!responseCode.isError())
+        {
             throw new IllegalArgumentException("Constructing an ErrorResponseException with a non-error ResponseCode is forbidden");
         }
         this.responseCode = responseCode;
@@ -29,7 +32,8 @@ public class ErrorResponseException extends RuntimeException {
      * @return the {@link ResponseCode}
      */
     @Nonnull
-    public ResponseCode getResponseCode() {
+    public ResponseCode getResponseCode()
+    {
         return responseCode;
     }
 
@@ -38,7 +42,8 @@ public class ErrorResponseException extends RuntimeException {
      *
      * @return the error code
      */
-    public int getErrorCode() {
+    public int getErrorCode()
+    {
         return responseCode.getCode();
     }
 
@@ -48,7 +53,8 @@ public class ErrorResponseException extends RuntimeException {
      * @return the meaning
      */
     @Nonnull
-    public String getMeaning() {
+    public String getMeaning()
+    {
         return responseCode.getMeaning();
     }
 }

@@ -1,5 +1,5 @@
 # OpenTDB API
-A simple wrapper for the [OpenTDB API](https://opentdb.com/).
+A simple wrapper for the [OpenTDB API](https://opentdb.com/) by [PixelTail Games](https://www.pixeltailgames.com/).
 
 ## Usage
 ```java

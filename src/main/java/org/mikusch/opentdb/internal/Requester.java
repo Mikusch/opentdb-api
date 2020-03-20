@@ -19,6 +19,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -26,8 +27,8 @@ import java.util.stream.Collectors;
 /**
  * Internal class used to send HTTP requests to the OpenTDB API.
  */
-public class Requester {
-
+public class Requester
+{
     private static final Logger LOGGER = LoggerFactory.getLogger(Requester.class);
 
     private static final String QUESTION_ENDPOINT = OpenTDB.BASE_URL + "/api.php";
@@ -39,15 +40,18 @@ public class Requester {
     private final OpenTDBImpl api;
     private Instant tokenInitTime;
 
-    public Requester(final OpenTDBImpl api) {
+    public Requester(final OpenTDBImpl api)
+    {
         this.api = api;
     }
 
-    public CompletableFuture<List<Question<?, ?>>> sendAsync(final Request request) {
+    public CompletableFuture<List<Question<?, ?>>> sendAsync(final Request request)
+    {
         return api.getHttpClient().sendAsync(this.buildHttpRequest(request), HttpResponse.BodyHandlers.ofString()).thenApplyAsync(this::handleResponse);
     }
 
-    private HttpRequest buildHttpRequest(final Request request) {
+    private HttpRequest buildHttpRequest(final Request request)
+    {
         final StringBuilder uri = new StringBuilder(QUESTION_ENDPOINT)
                 .append("?").append(api.getEncodingType().getParameterName()).append("=").append(api.getEncodingType().getParameterValue())
                 .append("&" + QUERY_PARAM_AMOUNT + "=").append(request.getAmount());
@@ -61,27 +65,32 @@ public class Requester {
         if (request.getDifficulty() != null)
             uri.append("&").append(request.getDifficulty().getParameterName()).append("=").append(request.getDifficulty().getParameterValue());
 
-        // token has been disabled or hasnt been fetched yet
+        // token has been disabled or hasn't been fetched yet
         if (api.getToken() != null) uri.append("&" + QUERY_PARAM_TOKEN + "=").append(api.getToken());
         return HttpRequest.newBuilder(URI.create(uri.toString())).build();
     }
 
-    private List<Question<?, ?>> handleResponse(final HttpResponse<String> httpResponse) throws ErrorResponseException {
+    private List<Question<?, ?>> handleResponse(final HttpResponse<String> httpResponse) throws ErrorResponseException
+    {
         final JSONObject body = new JSONObject(httpResponse.body());
         final ResponseCode response = ResponseCode.fromCode(body.getInt("response_code"));
-        switch (response) {
+        switch (response)
+        {
             case SUCCESS:
                 return this.getQuestionsFromJson(body);
             case TOKEN_NOT_FOUND:
-                if (tokenInitTime != null && this.isTokenExpired()) {
+                if (tokenInitTime != null && this.isTokenExpired())
                     throw new ErrorResponseException(response, "Session Token has been invalidated after 6 hours of inactivity");
-                }
+                break;
             default:
                 throw new ErrorResponseException(response);
         }
+
+        return Collections.emptyList();
     }
 
-    private List<Question<?, ?>> getQuestionsFromJson(final JSONObject body) {
+    private List<Question<?, ?>> getQuestionsFromJson(final JSONObject body)
+    {
         final List<Question<?, ?>> questions = new ArrayList<>();
         final JSONArray jsonArray = body.getJSONArray("results");
         jsonArray.forEach(element -> {
@@ -89,7 +98,8 @@ public class Requester {
             final Question.Type type = Question.Type.valueOf(jsonElement.getString("type").toUpperCase());
 
             final Question<?, ?> question;
-            switch (type) {
+            switch (type)
+            {
 
                 case BOOLEAN:
                     question = new BooleanQuestion(
@@ -119,11 +129,13 @@ public class Requester {
         return questions;
     }
 
-    private boolean isTokenExpired() {
+    private boolean isTokenExpired()
+    {
         return Duration.between(tokenInitTime, Instant.now()).compareTo(Duration.ofHours(6)) > 0;
     }
 
-    public CompletableFuture<Void> resetToken() {
+    public CompletableFuture<Void> resetToken()
+    {
         final HttpRequest request = HttpRequest.newBuilder(URI.create(TOKEN_ENDPOINT + "?command=reset&token=" + api.getToken())).build();
         return api.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenAcceptAsync(response -> {
             LOGGER.info("Session token has been reset");
@@ -131,28 +143,38 @@ public class Requester {
         });
     }
 
-    public void fetchToken() {
+    public void fetchToken()
+    {
         final HttpRequest request = HttpRequest.newBuilder(URI.create(TOKEN_ENDPOINT + "?command=request")).build();
         api.getHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenAcceptAsync(this::initTokenFromResponse);
     }
 
-    private void initTokenFromResponse(final HttpResponse<String> response) {
+    private void initTokenFromResponse(final HttpResponse<String> response)
+    {
         final JSONObject body = new JSONObject(response.body());
         final ResponseCode responseCode = ResponseCode.fromCode(body.getInt("response_code"));
 
-        if (responseCode == ResponseCode.SUCCESS) {
+        if (responseCode == ResponseCode.SUCCESS)
+        {
             LOGGER.debug("Initializing session token");
             tokenInitTime = Instant.now();
-            api.setToken(body.getString("token"));
-        } else {
+            api.setToken(body.getString(QUERY_PARAM_TOKEN));
+        }
+        else
+        {
             throw new AssertionError("Somehow the API refused to generate a token for us, wtf?");
         }
     }
 
-    public List<Question<?, ?>> send(final Request request) throws ErrorResponseException {
-        try {
+    public List<Question<?, ?>> send(final Request request) throws ErrorResponseException
+    {
+        try
+        {
             return this.handleResponse(api.getHttpClient().send(this.buildHttpRequest(request), HttpResponse.BodyHandlers.ofString()));
-        } catch (final IOException | InterruptedException e) {
+        }
+        catch (final IOException | InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
             throw new ErrorResponseException(ResponseCode.UNKNOWN, e.getMessage());
         }
     }
